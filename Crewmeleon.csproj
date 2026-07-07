@@ -16,7 +16,7 @@
   <ItemGroup>
     <Compile Include="BepInEx\BepInAutoPluginAttribute.cs" />
     <Compile Include="BepInEx\Preloader\Core\Patching\PatcherAutoPluginAttribute.cs" />
-    <Compile Include="Components\PaintCanvas2D.cs" />
+    <Compile Include="Components\ChamaleonPaint.cs" />
     <Compile Include="CrewmeleonPlugin.cs" />
     <Compile Include="Essential\ChameleonHelper.cs" />
     <Compile Include="Roles\ChameleonRole.cs" />
