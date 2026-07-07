@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
+using Crewmeleon.Components;
 using FungleAPI.Api;
 using FungleAPI.PluginLoading;
 using HarmonyLib;

@@ -1,4 +1,5 @@
-﻿using Crewmeleon.Essential;
+﻿using Crewmeleon.Components;
+using Crewmeleon.Essential;
 using FungleAPI.Base.Roles;
 using FungleAPI.Extensions;
 using FungleAPI.Role;
@@ -15,6 +16,8 @@ namespace Crewmeleon.Roles
 {
     public class ChameleonRole : CrewmateBase, ICustomRole
     {
+        public static ChameleonPaint Local;
+
         public ModdedTeam Team { get; } = ModdedTeamManager.Crewmates;
         public StringNames RoleName { get; } = TranslationManager.GetStringName("Camaleão");
         public StringNames RoleBlur { get; } = TranslationManager.GetStringName("Se camufle");
@@ -54,7 +57,10 @@ namespace Crewmeleon.Roles
                 SpriteMeshType.FullRect
             );
 
-            Chameleon.gameObject.AddComponent<ChamaleonPaint>();
+            if (Player.AmOwner)
+            {
+                Local = Chameleon.gameObject.AddComponent<ChameleonPaint>();
+            }
 
             Player.MyPhysics.Animations.group.SpriteAnimator.transform.parent.localScale = Vector3.zero;
 
