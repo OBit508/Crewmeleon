@@ -1,4 +1,6 @@
-﻿using Crewmeleon.Components;
+﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
+using Crewmeleon.Components;
+using Crewmeleon.Essential;
 using FungleAPI.Base.Roles;
 using FungleAPI.Role;
 using FungleAPI.Role.Utilities;
@@ -26,7 +28,8 @@ namespace Crewmeleon.Roles
         public RoleConfiguration Configuration => new RoleConfiguration(this)
         {
             CanUseVent = false,
-            CanSabotage = false
+            CanSabotage = false,
+            HideInLobby = true
         };
         public KillButtonConfig KillConfig { get; } = new KillButtonConfig(out KillButtonConfig self)
         {
@@ -38,6 +41,20 @@ namespace Crewmeleon.Roles
         public override bool ValidTarget(NetworkedPlayerInfo target)
         {
             return base.ValidTarget(target) && SafeToKill.Contains(target);
+        }
+        public void StartStun()
+        {
+            StartCoroutine(CoStun().WrapToIl2Cpp());
+        }
+        public System.Collections.IEnumerator CoStun()
+        {
+            Player.cosmetics.SetBodyCosmeticsVisible(false);
+            yield return Player.MyPhysics.CoAnimateCustom(HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim);
+            Player.cosmetics.ToggleHat(true);
+            Player.MyPhysics.SetBodyType(PlayerBodyTypes.Seeker);
+            Player.moveable = false;
+            yield return new WaitForSeconds(ChameleonModeSettings.GeneralSettings.HideTime.FloatValue);
+            Player.moveable = true;
         }
     }
 }

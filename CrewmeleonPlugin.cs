@@ -2,6 +2,7 @@
 using BepInEx.Unity.IL2CPP;
 using Crewmeleon.Components;
 using FungleAPI.Api;
+using FungleAPI.GameOptions.Lobby;
 using FungleAPI.PluginLoading;
 using HarmonyLib;
 
@@ -19,5 +20,6 @@ namespace TheOldUs
         {
             Harmony.PatchAll();
         }
+        public void LoadTabs(ModPlugin modPlugin) { }
     }
 }

@@ -19,8 +19,9 @@
     <Compile Include="Buttons\ColorButton.cs" />
     <Compile Include="Buttons\DrawButton.cs" />
     <Compile Include="Components\ChameleonPaint.cs" />
-    <Compile Include="Components\ChameleonReveler.cs" />
     <Compile Include="CrewmeleonPlugin.cs" />
+    <Compile Include="Essential\ChameleonEvents.cs" />
+    <Compile Include="Essential\ChameleonModeSettings.cs" />
     <Compile Include="Essential\ChameleonGameMode.cs" />
     <Compile Include="Essential\ChameleonHelper.cs" />
     <Compile Include="Essential\PaintState.cs" />
