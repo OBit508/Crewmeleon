@@ -2,6 +2,7 @@
 using Crewmeleon.Components;
 using Crewmeleon.Essential;
 using FungleAPI.Base.Roles;
+using FungleAPI.GameModes;
 using FungleAPI.Role;
 using FungleAPI.Role.Utilities;
 using FungleAPI.Teams;
@@ -53,7 +54,12 @@ namespace Crewmeleon.Roles
             Player.cosmetics.ToggleHat(true);
             Player.MyPhysics.SetBodyType(PlayerBodyTypes.Seeker);
             Player.moveable = false;
-            yield return new WaitForSeconds(ChameleonModeSettings.GeneralSettings.HideTime.FloatValue);
+            
+            while (GameMode<ChameleonGameMode>.Instance.HideTime > 0)
+            {
+                yield return null;
+            }
+
             Player.moveable = true;
         }
     }

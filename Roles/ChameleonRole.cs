@@ -8,6 +8,7 @@ using FungleAPI.Role;
 using FungleAPI.Ship;
 using FungleAPI.Teams;
 using FungleAPI.Translation;
+using FungleAPI.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,12 +44,15 @@ namespace Crewmeleon.Roles
         public float updateNearbyImpostorsTime;
 
         public bool wasReveled;
+        public bool timeUp;
 
         public HorizontalGauge Gauge;
 
         public void Start()
         {
             if (Player == null) return;
+
+            Player.MyPhysics.Speed = 1.5f;
 
             Chameleon = new GameObject("Chameleon")
             {
@@ -95,13 +99,13 @@ namespace Crewmeleon.Roles
             Player.MyPhysics.Animations.group.SpriteAnimator.transform.parent.localScale = Vector3.zero;
 
             HorizontalGauge gaugePrefab;
-            if (GetMinigamePrefab(TaskTypes.UploadData) != null)
+            if (GetTaskPrefab(TaskTypes.UploadData) != null)
             {
-                gaugePrefab = GetMinigamePrefab(TaskTypes.UploadData).TryCast<UploadDataGame>().Gauge;
+                gaugePrefab = GetTaskPrefab(TaskTypes.UploadData).MinigamePrefab.TryCast<UploadDataGame>().Gauge;
             }
             else
             {
-                gaugePrefab = GetMinigamePrefab(TaskTypes.ProcessData).TryCast<ProcessDataMinigame>().Gauge;
+                gaugePrefab = GetTaskPrefab(TaskTypes.ProcessData).MinigamePrefab.TryCast<ProcessDataMinigame>().Gauge;
             }
             Gauge = GameObject.Instantiate<HorizontalGauge>(gaugePrefab, Player.transform);
             Gauge.transform.localPosition = new Vector3(0, -0.7f, 0);
@@ -164,77 +168,82 @@ namespace Crewmeleon.Roles
         {
             if (Chameleon == null) return;
 
-            Player.cosmetics.ToggleHat(false);
-            Player.cosmetics.TogglePetVisible(false);
-            Player.cosmetics.ToggleVisor(false);
-            Player.cosmetics.ToggleNameVisible(false);
-            Player.cosmetics.skin.Visible = false;
-
-            Chameleon.flipX = Player.cosmetics.FlipX;
-
-            if (Player.AmOwner)
+            if (!timeUp)
             {
-                sendTimer += Time.deltaTime;
-                if (sendTimer >= 0.15f)
-                {
-                    if (Local != null && Local.PaintStrokes.Count > 0)
-                    {
-                        Rpc<RpcSyncBody>.Instance.Send(Player.Data);
-                    }
-                    sendTimer = 0;
-                }
-            }
+                Player.cosmetics.ToggleHat(false);
+                Player.cosmetics.TogglePetVisible(false);
+                Player.cosmetics.ToggleVisor(false);
+                Player.cosmetics.ToggleNameVisible(false);
+                Player.cosmetics.skin.Visible = false;
 
-            updateNearbyImpostorsTime += Time.deltaTime;
-            if (updateNearbyImpostorsTime >= 0.05f)
-            {
-                if (NearbySeekers())
-                {
-                    proximityLevel += Time.deltaTime;
-                    if (proximityLevel > ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue)
-                    {
-                        proximityLevel = ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
-                    }
+                Chameleon.flipX = Player.cosmetics.FlipX;
 
-                    if (Player.AmOwner)
-                    {
-                        Gauge.gameObject.SetActive(true);
-                        Gauge.Value = proximityLevel / ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
-                    }
-                }
-                else
+                if (Player.AmOwner)
                 {
-                    proximityLevel = 0;
-
-                    if (Player.AmOwner)
+                    sendTimer += Time.deltaTime;
+                    if (sendTimer >= 0.15f)
                     {
-                        Gauge.gameObject.SetActive(false);
+                        if (Local != null && Local.PaintStrokes.Count > 0)
+                        {
+                            Rpc<RpcSyncBody>.Instance.Send(Player.Data);
+                        }
+                        sendTimer = 0;
                     }
                 }
 
-                updateNearbyImpostorsTime = 0;
+                updateNearbyImpostorsTime += Time.deltaTime;
+                if (updateNearbyImpostorsTime >= 0.05f)
+                {
+                    if (NearbySeekers())
+                    {
+                        proximityLevel += Time.deltaTime;
+                        if (proximityLevel > ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue)
+                        {
+                            proximityLevel = ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
+                        }
+
+                        if (Player.AmOwner)
+                        {
+                            Gauge.gameObject.SetActive(true);
+                            Gauge.Value = proximityLevel / ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
+                        }
+                    }
+                    else
+                    {
+                        proximityLevel = 0;
+
+                        if (Player.AmOwner)
+                        {
+                            Gauge.gameObject.SetActive(false);
+                        }
+                    }
+
+                    updateNearbyImpostorsTime = 0;
+                }
+
+                UpdateStopTimer();
+
+                bool reveled = stopedTimer < ChameleonModeSettings.ChameleonSettings.StopOutline.FloatValue || proximityLevel >= ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
+
+                Chameleon.material.SetFloat("_Outline", (reveled ? 1 : 0));
+
+                if (reveled && !wasReveled && !SeekerRole.SafeToKill.Contains(Player.Data))
+                {
+                    SeekerRole.SafeToKill.Add(Player.Data);
+                }
+                else if (!reveled && wasReveled && SeekerRole.SafeToKill.Contains(Player.Data))
+                {
+                    SeekerRole.SafeToKill.Remove(Player.Data);
+                }
+
+                wasReveled = reveled;
             }
-
-            UpdateStopTimer();
-
-            bool reveled = stopedTimer < ChameleonModeSettings.ChameleonSettings.StopOutline.FloatValue || proximityLevel >= ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
-
-            Chameleon.material.SetFloat("_Outline", (reveled ? 1 : 0));
-
-            if (reveled && !wasReveled && !SeekerRole.SafeToKill.Contains(Player.Data))
-            {
-                SeekerRole.SafeToKill.Add(Player.Data);
-            }
-            else if (!reveled && wasReveled && SeekerRole.SafeToKill.Contains(Player.Data))
-            {
-                SeekerRole.SafeToKill.Remove(Player.Data);
-            }
-
-            wasReveled = reveled;
         }
         public void OnDestroy()
         {
             if (Player == null) return;
+
+            Player.MyPhysics.Speed = 2.5f;
 
             if (Player.AmOwner)
             {
@@ -267,10 +276,21 @@ namespace Crewmeleon.Roles
                 stopedTimer = 0;
             }
         }
-        public Minigame GetMinigamePrefab(TaskTypes type)
+        public void Reveal()
         {
-            return ShipPrefabLoader.SkeldPrefab.GetAllTasks().FirstOrDefault(t 
-                => t.TaskType == type).MinigamePrefab;
+            Player.moveable = false;
+
+            ArrowBehaviour arrowBehaviour = GameObject.Instantiate(GetTaskPrefab(TaskTypes.FixWiring).SafeCast<NormalPlayerTask>().Arrow);
+            arrowBehaviour.gameObject.SetActive(true);
+            arrowBehaviour.MaxScale = 0.5f;
+            arrowBehaviour.target = Player.transform.position;
+
+            timeUp = true;
+            Chameleon.material.SetFloat("_Outline", 1);
+        }
+        public PlayerTask GetTaskPrefab(TaskTypes type)
+        {
+            return ShipPrefabLoader.SkeldPrefab.GetAllTasks().FirstOrDefault(t => t.TaskType == type);
         }
         public bool NearbySeekers()
         {
