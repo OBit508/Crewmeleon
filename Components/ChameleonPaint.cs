@@ -8,14 +8,16 @@ namespace Crewmeleon.Components
     [FungleAPI.Attributes.RegisterTypeInIl2Cpp]
     public class ChameleonPaint : MonoBehaviour
     {
-        public Dictionary<Vector2Int, Color32> ChangedPixels = new Dictionary<Vector2Int, Color32>();
+        public Dictionary<Vector2Int, Color32> PaintStrokes = new Dictionary<Vector2Int, Color32>();
 
-        public int brushSize = 5;
-        public float brushSoftness = 0.3f;
-        public float minAlphaThreshold = 0f;
+        public const float paintDelay = 0.015f;
 
-        public int cursorPreviewSortingOrderOffset = 1;
-        public float cursorPreviewAlpha = 0.6f;
+        public const int brushSize = 5;
+        public const float brushSoftness = 0.3f;
+        public const float minAlphaThreshold = 0f;
+
+        public const int cursorPreviewSortingOrderOffset = 1;
+        public const float cursorPreviewAlpha = 0.6f;
 
         private bool canPaint = true;
         public bool CanPaint
@@ -46,6 +48,8 @@ namespace Crewmeleon.Components
         private GameObject cursorPreviewObject;
         private SpriteRenderer cursorPreviewRenderer;
         private int cursorPreviewTextureSize = -1;
+
+        private float paintTimer;
 
         public void Awake()
         {
@@ -94,6 +98,7 @@ namespace Crewmeleon.Components
             if (Input.GetMouseButtonDown(0))
             {
                 isPainting = true;
+                paintTimer = paintDelay;
                 lastPaintedPixel = new(-1, -1);
             }
 
@@ -120,25 +125,30 @@ namespace Crewmeleon.Components
 
             Vector2Int current = pixel.Value;
 
-            if (lastPaintedPixel.x < 0)
+            paintTimer += Time.deltaTime;
+            if (paintTimer >= paintDelay)
             {
-                PaintBrush(current);
-            }
-            else
-            {
-                float distance = Vector2Int.Distance(lastPaintedPixel, current);
-                int steps = Mathf.Max(1, Mathf.CeilToInt(distance));
-
-                for (int i = 0; i <= steps; i++)
+                if (lastPaintedPixel.x < 0)
                 {
-                    float t = i / (float)steps;
-
-                    PaintBrush(new Vector2Int(Mathf.RoundToInt(Mathf.Lerp(lastPaintedPixel.x, current.x, t)), Mathf.RoundToInt(Mathf.Lerp(lastPaintedPixel.y, current.y, t))));
+                    PaintBrush(current);
                 }
+                else
+                {
+                    float distance = Vector2Int.Distance(lastPaintedPixel, current);
+                    int steps = Mathf.Max(1, Mathf.CeilToInt(distance));
+
+                    for (int i = 0; i <= steps; i++)
+                    {
+                        float t = i / (float)steps;
+
+                        PaintBrush(new Vector2Int(Mathf.RoundToInt(Mathf.Lerp(lastPaintedPixel.x, current.x, t)), Mathf.RoundToInt(Mathf.Lerp(lastPaintedPixel.y, current.y, t))));
+                    }
+                }
+                texture.Apply();
+                paintTimer = 0;
             }
 
             lastPaintedPixel = current;
-            texture.Apply();
         }
         private Vector2Int? MouseToPixelCoord()
         {
@@ -322,16 +332,11 @@ namespace Crewmeleon.Components
                     Color32 result = Color.Lerp(current, ChameleonHelper.BrushColor, strength * ChameleonHelper.BrushColor.a);
                     result.a = current.a;
 
-                    ChangedPixels[new Vector2Int(x, y)] = result;
-
                     texture.SetPixel(x, y, result);
                 }
             }
-        }
-        public void SetBrushSize(int size)
-        {
-            brushSize = Mathf.Max(1, size);
-            cursorPreviewTextureSize = -1;
+
+            PaintStrokes[center] = ChameleonHelper.BrushColor;
         }
     }
 }

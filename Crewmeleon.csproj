@@ -19,12 +19,14 @@
     <Compile Include="Buttons\ColorButton.cs" />
     <Compile Include="Buttons\DrawButton.cs" />
     <Compile Include="Components\ChameleonPaint.cs" />
+    <Compile Include="Components\ChameleonReveler.cs" />
     <Compile Include="CrewmeleonPlugin.cs" />
     <Compile Include="Essential\ChameleonGameMode.cs" />
     <Compile Include="Essential\ChameleonHelper.cs" />
     <Compile Include="Essential\PaintState.cs" />
-    <Compile Include="Patches\CustomNetworkTransformPatch.cs" />
     <Compile Include="Roles\ChameleonRole.cs" />
+    <Compile Include="Roles\SeekerRole.cs" />
+    <Compile Include="RPC\RpcSyncBody.cs" />
     <Compile Include="System\Runtime\CompilerServices\RefSafetyRulesAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
