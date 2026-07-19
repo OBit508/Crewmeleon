@@ -1,9 +1,11 @@
 ﻿using AmongUs.GameOptions;
 using Crewmeleon.Roles;
+using Crewmeleon.RPC;
 using FungleAPI.Api;
 using FungleAPI.Components;
 using FungleAPI.Extensions;
 using FungleAPI.GameModes;
+using FungleAPI.Networking;
 using FungleAPI.PluginLoading;
 using FungleAPI.Role;
 using FungleAPI.Role.Utilities;
@@ -19,7 +21,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-namespace Crewmeleon.Essential
+namespace Crewmeleon.GameMode
 {
     public class ChameleonGameMode : NormalGameMode
     {
@@ -33,8 +35,6 @@ namespace Crewmeleon.Essential
         public override StringNames GameModeName => TranslationManager.GetStringName("Camaleões");
         public override void OnGameStart()
         {
-            HudManager.Instance.CrewmatesKilled.gameObject.SetActive(true);
-
             ProgressTracker = HudManager.Instance.TaskPanel.transform.parent.GetChild(1).GetComponent<ProgressTracker>();
             TitleText = ProgressTracker.transform.GetChild(2).GetComponent<TextMeshPro>();
 
@@ -86,6 +86,24 @@ namespace Crewmeleon.Essential
                 }
             };
         }
+        public override void SetTaskPanelText(HudManager hudManager)
+        {
+            foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls)
+            {
+                string roleText = playerControl.Data.Role.NiceName;
+                if (playerControl.Data.IsDead)
+                {
+                    roleText = "Morto";
+                }
+                hudManager.tasksString.AppendLine($"{playerControl.Data.PlayerName}: {playerControl.Data.Role.TeamColor.ToTextColor()}{roleText}</color>");
+            }
+        }
+        public override float CanUseMapConsole(MapConsole mapConsole, NetworkedPlayerInfo pc, out bool canUse, out bool couldUse)
+        {
+            canUse = false;
+            couldUse = false;
+            return 0;
+        }
         public override void OnGameEnd()
         {
             Manager.GetComponent<Updater>()?.Destroy();
@@ -96,11 +114,11 @@ namespace Crewmeleon.Essential
         }
         public override float GetKillCooldown()
         {
-            return ChameleonModeSettings.GeneralSettings.KillCooldown.FloatValue;
+            return 0.01f;
         }
         public override float GetPlayerSpeedMod(PlayerControl pc)
         {
-            return ChameleonModeSettings.GeneralSettings.PlayerSpeed.FloatValue;
+            return pc.Data.Role.TeamType == RoleTeamTypes.Impostor ? ChameleonModeSettings.GeneralSettings.SeekerSpeed.FloatValue : ChameleonModeSettings.GeneralSettings.ChameleonSpeed.FloatValue;
         }
         public override bool CanReportBodies()
         {
@@ -108,7 +126,6 @@ namespace Crewmeleon.Essential
         }
         public override void OnPlayerDeath(PlayerControl player, bool assignGhostRole)
         {
-            HudManager.Instance.CrewmatesKilled.OnCrewmateKilled();
             if (AmongUsClient.Instance.AmHost && assignGhostRole)
             {
                 player.RpcSetRole(RoleTypes.CrewmateGhost, false);
@@ -134,7 +151,20 @@ namespace Crewmeleon.Essential
             List<PlayerControl> playerControls = PlayerControl.AllPlayerControls.ToSystemList();
             EnumerableExtensions.Shuffle(playerControls);
 
-            for (int i = 0; i < ChameleonModeSettings.GeneralSettings.SeekersCount.IntValue; i++)
+            if (playerControls.Count <= 0) return;
+
+            int players = ChameleonModeSettings.GeneralSettings.SeekersCount.IntValue;
+
+            if (HostImpCommand.HostImpostorEnabled && playerControls.Contains(PlayerControl.LocalPlayer))
+            {
+                players--;
+
+                playerControls.Remove(PlayerControl.LocalPlayer);
+
+                PlayerControl.LocalPlayer.RpcSetRole(CustomRoleManager.GetRoleType<SeekerRole>());
+            }
+
+            for (int i = 0; i < players; i++)
             {
                 if (playerControls.Count <= 0) break;
 
@@ -153,12 +183,33 @@ namespace Crewmeleon.Essential
             if (RevelationTime <= 0)
             {
                 Manager.RpcEndGame(GameOverReason.CrewmatesByTask, false);
+                CanCount = false;
                 return;
             }
 
-            if (!PlayerControl.AllPlayerControls.Any(p => p.Data.Role.TeamType != RoleTeamTypes.Impostor && !p.Data.IsDead))
+            int aliveCrewmates = 0;
+            int aliveImpostors = 0;
+            foreach (NetworkedPlayerInfo networkedPlayerInfo in GameData.Instance.AllPlayers)
+            {
+                if (!networkedPlayerInfo.IsDead)
+                {
+                    if (networkedPlayerInfo.Role.TeamType == RoleTeamTypes.Impostor)
+                    {
+                        aliveImpostors++;
+                        continue;
+                    }
+                    aliveCrewmates++;
+                }
+            }
+            if (aliveCrewmates <= 0)
             {
                 Manager.RpcEndGame(GameOverReason.ImpostorsByKill, false);
+                CanCount = false;
+            }
+            else if (aliveImpostors <= 0)
+            {
+                Manager.RpcEndGame(GameOverReason.CrewmatesByTask, false);
+                CanCount = false;
             }
         }
     }

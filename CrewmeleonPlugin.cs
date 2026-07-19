@@ -9,7 +9,7 @@ using HarmonyLib;
 namespace TheOldUs
 {
     [BepInProcess("Among Us.exe")]
-    [BepInPlugin("obit508.crewmeleon", "Crewmeleon", "0.0.1")]
+    [BepInPlugin("obit508.crewmeleon", "Crewmeleon", "0.0.8")]
     [BepInDependency(FungleApiPlugin.ModId)]
     public class CrewmeleonPlugin : BasePlugin, IFungleBasePlugin
     {
@@ -19,6 +19,7 @@ namespace TheOldUs
         public override void Load()
         {
             Harmony.PatchAll();
+            AddComponent<MouseIconBehaviour>();
         }
         public void LoadTabs(ModPlugin modPlugin) { }
     }

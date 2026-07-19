@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Crewmeleon.Essential
 {
-    public enum PaintState
+    public enum PaintState : byte
     {
         Painting,
         ColorPicker,

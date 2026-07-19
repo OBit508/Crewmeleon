@@ -1,4 +1,5 @@
-﻿using Crewmeleon.Roles;
+﻿using Crewmeleon.GameMode;
+using Crewmeleon.Roles;
 using FungleAPI.Event;
 using FungleAPI.Event.Vanilla;
 using FungleAPI.GameModes;
@@ -23,7 +24,7 @@ namespace Crewmeleon.Essential
                 {
                     if (playerControl.Data.Role.Is(out SeekerRole seekerRole))
                     {
-                        seekerRole.StartStun();
+                        seekerRole.StartStun(true);
                     }
                 }
             }
@@ -31,6 +32,7 @@ namespace Crewmeleon.Essential
         [EventRegister]
         public static void OnShip(ShipStartEvent shipStartEvent)
         {
+            ChameleonHelper.PaintState = PaintState.None;
             if (!GameManager.Instance.IsHideAndSeek() && GameModeManager.GetCurrentGameMode() is ChameleonGameMode)
             {
                 ShipStatus.Instance?.BreakEmergencyButton();

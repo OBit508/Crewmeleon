@@ -1,8 +1,10 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Crewmeleon.Components;
-using Crewmeleon.Essential;
+using Crewmeleon.GameMode;
+using Crewmeleon.RPC;
 using FungleAPI.Base.Roles;
 using FungleAPI.GameModes;
+using FungleAPI.Networking;
 using FungleAPI.Role;
 using FungleAPI.Role.Utilities;
 using FungleAPI.Teams;
@@ -37,30 +39,67 @@ namespace Crewmeleon.Roles
             SetTarget = delegate (PlayerControl target)
             {
                 self.Button.currentTarget = target;
+            },
+            DoClick = delegate
+            {
+                if (self.CanUse())
+                {
+                    if (ChameleonModeSettings.InfectionSettings.Infection.BooleanValue)
+                    {
+                        Rpc<RpcSetSeeker>.Instance.Send(self.Button.currentTarget, PlayerControl.LocalPlayer);
+                    }
+                    else
+                    {
+                        PlayerControl.LocalPlayer.CmdCheckMurder(self.Button.currentTarget);
+                    }
+                    self.SetTarget(null);
+                }
             }
         };
         public override bool ValidTarget(NetworkedPlayerInfo target)
         {
             return base.ValidTarget(target) && SafeToKill.Contains(target);
         }
-        public void StartStun()
+        public void StartStun(bool stun)
         {
-            StartCoroutine(CoStun().WrapToIl2Cpp());
+            StartCoroutine(CoStun(stun).WrapToIl2Cpp());
         }
-        public System.Collections.IEnumerator CoStun()
+        public System.Collections.IEnumerator CoStun(bool stun)
         {
+            if (Player.AmOwner && stun)
+            {
+                HudManager.Instance.FullScreen.gameObject.SetActive(true);
+                HudManager.Instance.FullScreen.color = Color.black;
+            }
+
+            Player.MyPhysics.Speed = 0;
+            Player.rigidbody2D.velocity = Vector2.zero;
             Player.cosmetics.SetBodyCosmeticsVisible(false);
             yield return Player.MyPhysics.CoAnimateCustom(HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim);
             Player.cosmetics.ToggleHat(true);
             Player.MyPhysics.SetBodyType(PlayerBodyTypes.Seeker);
-            Player.moveable = false;
-            
+            Player.MyPhysics.Speed = 0;
+            Player.rigidbody2D.velocity = Vector2.zero;
+
+            if (GameMode<ChameleonGameMode>.Instance.HideTime <= 0)
+            {
+                if (Player.AmOwner && stun)
+                {
+                    HudManager.Instance.FullScreen.gameObject.SetActive(false);
+                }
+                Player.MyPhysics.Speed = 2.5f;
+                yield break;
+            }
             while (GameMode<ChameleonGameMode>.Instance.HideTime > 0)
             {
                 yield return null;
             }
 
-            Player.moveable = true;
+            if (Player.AmOwner && stun)
+            {
+                HudManager.Instance.FullScreen.gameObject.SetActive(false);
+            }
+            Player.MyPhysics.Speed = 2.5f;
         }
     }
 }

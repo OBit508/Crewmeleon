@@ -1,4 +1,5 @@
-﻿using Crewmeleon.Essential;
+﻿using Crewmeleon.Components;
+using Crewmeleon.Essential;
 using Crewmeleon.Roles;
 using FungleAPI.Base.Buttons;
 using FungleAPI.Hud;
@@ -15,8 +16,9 @@ namespace Crewmeleon.Buttons
     [FungleAPI.Attributes.RegisterPriority(0)]
     public class DrawButton : RoleButton<ChameleonRole>
     {
+        public CanvaBehaviour Canva;
         public override ButtonLocation Location => ButtonLocation.BottomLeft;
-        public override Sprite ButtonSprite => ChameleonHelper.ColorButton;
+        public override Sprite ButtonSprite => null;
         public override string OverrideText => string.Empty;
         public override Color32 TextOutlineColor => Color.black;
         public override float Cooldown => 1;
@@ -25,6 +27,10 @@ namespace Crewmeleon.Buttons
             if (ChameleonHelper.PaintState == PaintState.None)
             {
                 ChameleonHelper.PaintState = PaintState.Painting;
+                SpectatorBehaviour spectatorBehaviour = Player.GetComponent<SpectatorBehaviour>();
+
+                spectatorBehaviour.Spectating = false;
+                spectatorBehaviour.Update();
             }
             else
             {
@@ -36,11 +42,6 @@ namespace Crewmeleon.Buttons
         {
             base.Update();
             Button.buttonLabelText.text = ChameleonHelper.PaintState == PaintState.None ? "Desenhar" : "Parar";
-
-            if (ChameleonRole.Local != null)
-            {
-                Button.graphic.sprite = ChameleonRole.Local.sprite;
-            }
         }
     }
 }

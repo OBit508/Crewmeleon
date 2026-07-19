@@ -18,17 +18,36 @@
     <Compile Include="BepInEx\Preloader\Core\Patching\PatcherAutoPluginAttribute.cs" />
     <Compile Include="Buttons\ColorButton.cs" />
     <Compile Include="Buttons\DrawButton.cs" />
-    <Compile Include="Components\ChameleonPaint.cs" />
+    <Compile Include="Buttons\GradientButton.cs" />
+    <Compile Include="Buttons\SpectateButton.cs" />
+    <Compile Include="Components\CanvaBehaviour.cs" />
+    <Compile Include="Components\CanvaPaintBehaviour.cs" />
+    <Compile Include="Components\MouseIconBehaviour.cs" />
+    <Compile Include="Components\SpectatorBehaviour.cs" />
     <Compile Include="CrewmeleonPlugin.cs" />
+    <Compile Include="Essential\ChameleonAssets.cs" />
     <Compile Include="Essential\ChameleonEvents.cs" />
-    <Compile Include="Essential\ChameleonModeSettings.cs" />
-    <Compile Include="Essential\ChameleonGameMode.cs" />
+    <Compile Include="Essential\ChameleonTranslation.cs" />
+    <Compile Include="GameMode\ChameleonModeSettings.cs" />
+    <Compile Include="GameMode\ChameleonGameMode.cs" />
     <Compile Include="Essential\ChameleonHelper.cs" />
+    <Compile Include="GameMode\HostImpCommand.cs" />
     <Compile Include="Essential\PaintState.cs" />
     <Compile Include="Roles\ChameleonRole.cs" />
     <Compile Include="Roles\SeekerRole.cs" />
+    <Compile Include="RPC\RpcSetSeeker.cs" />
     <Compile Include="RPC\RpcSyncBody.cs" />
     <Compile Include="System\Runtime\CompilerServices\RefSafetyRulesAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Gradient.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\SpectatorBackground.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Spectate2.png" />
+    <EmbeddedResource Include="Assets\Spectate1.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\ColorButton.png" />
@@ -36,9 +55,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\ColorDropper.png" />
     <EmbeddedResource Include="Assets\ColorBrush.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\ColorGradient.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\DefaultIdle.png" />

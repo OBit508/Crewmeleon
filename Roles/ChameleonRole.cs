@@ -1,10 +1,12 @@
 ﻿using Crewmeleon.Components;
 using Crewmeleon.Essential;
+using Crewmeleon.GameMode;
 using Crewmeleon.RPC;
 using FungleAPI.Base.Roles;
 using FungleAPI.Extensions;
 using FungleAPI.Networking;
 using FungleAPI.Role;
+using FungleAPI.Role.Utilities;
 using FungleAPI.Ship;
 using FungleAPI.Teams;
 using FungleAPI.Translation;
@@ -21,8 +23,7 @@ namespace Crewmeleon.Roles
 {
     public class ChameleonRole : CrewmateBase, ICustomRole
     {
-        public static ChameleonPaint Local;
-
+        public CanvaBehaviour CanvaBehaviour;
         public ModdedTeam Team { get; } = ModdedTeamManager.Crewmates;
         public StringNames RoleName { get; } = TranslationManager.GetStringName("Camaleão");
         public StringNames RoleBlur { get; } = TranslationManager.GetStringName("Se camufle");
@@ -31,12 +32,8 @@ namespace Crewmeleon.Roles
         public Color RoleColor { get; } = Color.gray;
         public RoleConfiguration Configuration => new RoleConfiguration(this)
         {
-            HideInLobby = true
+            HideInLobby = true,
         };
-
-        public SpriteRenderer Chameleon;
-        private bool[] paintable;
-        public float sendTimer;
 
         public float proximityLevel;
         public float stopedTimer;
@@ -52,49 +49,9 @@ namespace Crewmeleon.Roles
         {
             if (Player == null) return;
 
+            CanvaBehaviour = Player.GetComponent<CanvaBehaviour>();
+
             Player.MyPhysics.Speed = 1.5f;
-
-            Chameleon = new GameObject("Chameleon")
-            {
-                layer = Player.gameObject.layer,
-                transform =
-                {
-                    parent = Player.transform,
-                    localPosition = Vector3.zero,
-                    localScale = Vector3.one
-                }
-            }.AddComponent<SpriteRenderer>();
-
-            Chameleon.material = new Material(Shader.Find("Sprites/Outline"));
-            Chameleon.material.SetColor("_OutlineColor", Color.white);
-
-            SpriteRenderer spriteRenderer = Player.MyPhysics.Animations.group.SpriteAnimator.m_nodes.m_spriteRenderer;
-
-            Sprite original = ChameleonHelper.DefaultIdle;
-
-            Chameleon.sprite = Sprite.Create(
-                ChameleonHelper.ApplyMaterial(original.texture, spriteRenderer.material),
-                original.rect,
-                original.pivot / original.rect.size,
-                original.pixelsPerUnit,
-                0,
-                SpriteMeshType.FullRect
-            );
-
-            if (Player.AmOwner)
-            {
-                Local = Chameleon.gameObject.AddComponent<ChameleonPaint>();
-            }
-            else
-            {
-                Color[] pixels = Chameleon.sprite.texture.GetPixels();
-                paintable = new bool[pixels.Length];
-
-                for (int i = 0; i < pixels.Length; i++)
-                {
-                    paintable[i] = pixels[i].a > ChameleonPaint.minAlphaThreshold;
-                }
-            }
 
             Player.MyPhysics.Animations.group.SpriteAnimator.transform.parent.localScale = Vector3.zero;
 
@@ -113,83 +70,17 @@ namespace Crewmeleon.Roles
 
             Gauge.gameObject.SetActive(false);
         }
-        public void PaintBrush(Vector2Int center, Color32 brushColor)
-        {
-            int radius = ChameleonPaint.brushSize;
-
-            Texture2D texture = Chameleon.sprite.texture;
-
-            int minX = Mathf.Max(0, center.x - radius);
-            int maxX = Mathf.Min(texture.width - 1, center.x + radius);
-            int minY = Mathf.Max(0, center.y - radius);
-            int maxY = Mathf.Min(texture.height - 1, center.y + radius);
-
-            for (int y = minY; y <= maxY; y++)
-            {
-                for (int x = minX; x <= maxX; x++)
-                {
-                    Vector2Int pixel = new(x, y);
-                    float distance = Vector2Int.Distance(pixel, center);
-
-                    if (distance > radius)
-                    {
-                        continue;
-                    }
-
-                    int index = y * texture.width + x;
-
-                    if (!paintable[index])
-                    {
-                        continue;
-                    }
-
-                    Color32 current = texture.GetPixel(x, y);
-
-                    float strength = 1f;
-
-                    if (ChameleonPaint.brushSoftness > 0f)
-                    {
-                        float edge = radius * (1f - ChameleonPaint.brushSoftness);
-
-                        if (distance > edge)
-                        {
-                            strength = 1f - Mathf.InverseLerp(edge, radius, distance);
-                        }
-                    }
-
-                    Color32 result = Color.Lerp(current, brushColor, strength * brushColor.a);
-                    result.a = current.a;
-
-                    texture.SetPixel(x, y, result);
-                }
-            }
-        }
         public void Update()
         {
-            if (Chameleon == null) return;
+            if (Player == null) return;
 
             if (!timeUp)
             {
                 Player.cosmetics.ToggleHat(false);
                 Player.cosmetics.TogglePetVisible(false);
                 Player.cosmetics.ToggleVisor(false);
-                Player.cosmetics.ToggleNameVisible(false);
+                Player.cosmetics.ToggleNameVisible(ChameleonModeSettings.GeneralSettings.ShowNames.BooleanValue && !ChameleonModeSettings.InfectionSettings.Infection.BooleanValue && PlayerControl.LocalPlayer.Data.Role.TeamType != RoleTeamTypes.Impostor);
                 Player.cosmetics.skin.Visible = false;
-
-                Chameleon.flipX = Player.cosmetics.FlipX;
-
-                if (Player.AmOwner)
-                {
-                    sendTimer += Time.deltaTime;
-                    if (sendTimer >= 0.15f)
-                    {
-                        if (Local != null && Local.PaintStrokes.Count > 0)
-                        {
-                            Rpc<RpcSyncBody>.Instance.Send(Player.Data);
-                        }
-                        sendTimer = 0;
-                    }
-                }
 
                 updateNearbyImpostorsTime += Time.deltaTime;
                 if (updateNearbyImpostorsTime >= 0.05f)
@@ -223,24 +114,24 @@ namespace Crewmeleon.Roles
 
                 UpdateStopTimer();
 
-                bool reveled = stopedTimer < ChameleonModeSettings.ChameleonSettings.StopOutline.FloatValue || proximityLevel >= ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
+                CanvaBehaviour.OutlineActive = stopedTimer < ChameleonModeSettings.ChameleonSettings.StopOutline.FloatValue || proximityLevel >= ChameleonModeSettings.ChameleonSettings.FoundBar.FloatValue;
 
-                Chameleon.material.SetFloat("_Outline", (reveled ? 1 : 0));
-
-                if (reveled && !wasReveled && !SeekerRole.SafeToKill.Contains(Player.Data))
+                if (CanvaBehaviour.OutlineActive && !wasReveled && !SeekerRole.SafeToKill.Contains(Player.Data))
                 {
                     SeekerRole.SafeToKill.Add(Player.Data);
                 }
-                else if (!reveled && wasReveled && SeekerRole.SafeToKill.Contains(Player.Data))
+                else if (!CanvaBehaviour.OutlineActive && wasReveled && SeekerRole.SafeToKill.Contains(Player.Data))
                 {
                     SeekerRole.SafeToKill.Remove(Player.Data);
                 }
 
-                wasReveled = reveled;
+                wasReveled = CanvaBehaviour.OutlineActive;
             }
         }
         public void OnDestroy()
         {
+            Gauge?.gameObject.Destroy();
+
             if (Player == null) return;
 
             Player.MyPhysics.Speed = 2.5f;
@@ -251,8 +142,6 @@ namespace Crewmeleon.Roles
             }
 
             Player.MyPhysics.Animations.group.SpriteAnimator.transform.parent.localScale = Vector3.one;
-
-            Chameleon?.gameObject.Destroy();
 
             Player.cosmetics.ToggleHat(true);
             Player.cosmetics.TogglePetVisible(true);
@@ -279,6 +168,10 @@ namespace Crewmeleon.Roles
         public void Reveal()
         {
             Player.moveable = false;
+            Player.rigidbody2D.velocity = Vector2.zero;
+
+            CanvaBehaviour.ForceShow = true;
+            Player.cosmetics.ToggleNameVisible(true);
 
             ArrowBehaviour arrowBehaviour = GameObject.Instantiate(GetTaskPrefab(TaskTypes.FixWiring).SafeCast<NormalPlayerTask>().Arrow);
             arrowBehaviour.gameObject.SetActive(true);
@@ -286,8 +179,9 @@ namespace Crewmeleon.Roles
             arrowBehaviour.target = Player.transform.position;
 
             timeUp = true;
-            Chameleon.material.SetFloat("_Outline", 1);
+            CanvaBehaviour.OutlineActive = true;
         }
+        
         public PlayerTask GetTaskPrefab(TaskTypes type)
         {
             return ShipPrefabLoader.SkeldPrefab.GetAllTasks().FirstOrDefault(t => t.TaskType == type);

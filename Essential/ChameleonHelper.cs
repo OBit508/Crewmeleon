@@ -12,35 +12,8 @@ namespace Crewmeleon.Essential
     public static class ChameleonHelper
     {
         private static Texture2D texture;
-        private static PaintState state = PaintState.None;
-
-        public static LateSprite DefaultIdle = new LateSprite("Crewmeleon.Assets.DefaultIdle.png", 200);
-        public static LateSprite ColorButton = new LateSprite("Crewmeleon.Assets.ColorButton.png", 450);
-        public static LateSprite ColorGradient = new LateSprite("Crewmeleon.Assets.ColorGradient.png", 100);
-
-        public static LateSprite ColorBrush = new LateSprite("Crewmeleon.Assets.ColorBrush.png", 200, true);
-        public static LateSprite ColorDropper = new LateSprite("Crewmeleon.Assets.ColorDropper.png", 100, true);
-
         public static Color32 BrushColor = Color.white;
-        public static PaintState PaintState
-        {
-            get => state;
-            set
-            {
-                state = value;
-
-                if (state == PaintState.None)
-                {
-                    Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-                    return;
-                }
-
-                Texture2D texture2D = state == PaintState.Painting ? ColorBrush.Asset.texture : ColorDropper.Asset.texture;
-
-                Cursor.SetCursor(texture2D, new Vector2(0, texture2D.height), CursorMode.Auto);
-            }
-        }
-
+        public static PaintState PaintState;
         public static Color32 GetMousePixelColor()
         {
             if (texture == null)
@@ -54,9 +27,11 @@ namespace Crewmeleon.Essential
 
             texture.Apply();
 
-            return texture.GetPixel(0, 0);
-        }
+            Color32 color = texture.GetPixel(0, 0);
+            color.a = byte.MaxValue;
 
+            return color;
+        }
         public static Texture2D ApplyMaterial(Texture2D source, Material material)
         {
             RenderTexture rt = new RenderTexture(source.width, source.height, 0, RenderTextureFormat.ARGB32);
