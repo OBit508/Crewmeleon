@@ -1,4 +1,5 @@
-﻿using Crewmeleon.Components;
+﻿using Crewmeleon.Buttons;
+using Crewmeleon.Components;
 using Crewmeleon.Essential;
 using Crewmeleon.GameMode;
 using Crewmeleon.RPC;
@@ -126,6 +127,10 @@ namespace Crewmeleon.Roles
             if (Player.AmOwner)
             {
                 ChameleonHelper.PaintState = PaintState.None;
+                if (ZoomButton.Zoom != null)
+                {
+                    ZoomButton.Zoom.gameObject.SetActive(false);
+                }
             }
 
             Player.MyPhysics.Animations.group.SpriteAnimator.transform.parent.localScale = Vector3.one;
