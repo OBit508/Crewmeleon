@@ -39,5 +39,9 @@ namespace Crewmeleon.Essential
         public static Translator CamouflageTime { get; } = new Translator("Camouflage time");
         public static Translator MaxProximity { get; } = new Translator("Max proximity");
         public static Translator DangerBarLevel { get; } = new Translator("Danger bar level");
+
+        public static Translator HideTimerText { get; } = new Translator("Time to hide: {0}s");
+        public static Translator RemainTimeText { get; } = new Translator("Time remaining: {0}s");
+        public static Translator RevelationText { get; } = new Translator("Revelation: {0}s");
     }
 }

@@ -29,5 +29,8 @@
 
   "CamouflageTime": "Tempo de camuflagem",
   "MaxProximity": "Proximidade máxima",
-  "DangerBarLevel": "Nível da barra de perigo"
+  "DangerBarLevel": "Nível da barra de perigo",
+  "HideTimerText": "Tempo para se esconder: {0}s",
+  "RemainTimeText": "Tempo restante: {0}s",
+  "RevelationText":  "Revelação: {0}s"
 }

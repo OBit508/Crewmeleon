@@ -51,13 +51,13 @@ namespace Crewmeleon.GameMode
                     {
                         HideTime -= UnityEngine.Time.deltaTime;
                         ProgressTracker.curValue = HideTime / ChameleonModeSettings.GeneralSettings.HideTime.FloatValue;
-                        TitleText.text = $"Tempo para se esconder: {(int)HideTime}s";
+                        TitleText.text = string.Format(ChameleonTranslation.HideTimerText.GetString(), (int)HideTime);
                     }
                     else if (Time > 0)
                     {
                         Time -= UnityEngine.Time.deltaTime;
                         ProgressTracker.curValue = Time / ChameleonModeSettings.GeneralSettings.Time.FloatValue;
-                        TitleText.text = $"Tempo restante: {(int)Time}s";
+                        TitleText.text = string.Format(ChameleonTranslation.RemainTimeText.GetString(), (int)Time);
                         if (Time <= 0)
                         {
                             AudioClip audioClip = RoleManager.Instance.GetRole(RoleTypes.Noisemaker).SafeCast<NoisemakerRole>().deathSound;
@@ -78,7 +78,7 @@ namespace Crewmeleon.GameMode
                     {
                         RevelationTime -= UnityEngine.Time.deltaTime;
                         ProgressTracker.curValue = RevelationTime / 15;
-                        TitleText.text = $"Revelação: {(int)RevelationTime}s";
+                        TitleText.text = string.Format(ChameleonTranslation.RevelationText.GetString(), (int)RevelationTime);
                     }
                     ProgressTracker.enabled = false;
                     ProgressTracker.TileParent.enabled = true;
@@ -94,7 +94,7 @@ namespace Crewmeleon.GameMode
                 string roleText = playerControl.Data.Role.NiceName;
                 if (playerControl.Data.IsDead)
                 {
-                    roleText = "Morto";
+                    roleText = StringNames.DeadLabel.GetString();
                 }
                 hudManager.tasksString.AppendLine($"{playerControl.Data.PlayerName}: {playerControl.Data.Role.TeamColor.ToTextColor()}{roleText}</color>");
             }
@@ -190,11 +190,11 @@ namespace Crewmeleon.GameMode
 
             int aliveCrewmates = 0;
             int aliveImpostors = 0;
-            foreach (NetworkedPlayerInfo networkedPlayerInfo in GameData.Instance.AllPlayers)
+            foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls)
             {
-                if (!networkedPlayerInfo.IsDead)
+                if (!playerControl.Data.IsDead)
                 {
-                    if (networkedPlayerInfo.Role.TeamType == RoleTeamTypes.Impostor)
+                    if (playerControl.Data.Role.TeamType == RoleTeamTypes.Impostor)
                     {
                         aliveImpostors++;
                         continue;
@@ -206,8 +206,9 @@ namespace Crewmeleon.GameMode
             {
                 Manager.RpcEndGame(GameOverReason.ImpostorsByKill, false);
                 CanCount = false;
+                return;
             }
-            else if (aliveImpostors <= 0)
+            if (aliveImpostors <= 0)
             {
                 Manager.RpcEndGame(GameOverReason.CrewmatesByTask, false);
                 CanCount = false;
