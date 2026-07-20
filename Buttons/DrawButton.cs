@@ -19,7 +19,7 @@ namespace Crewmeleon.Buttons
         public CanvaBehaviour Canva;
         public override ButtonLocation Location => ButtonLocation.BottomLeft;
         public override Sprite ButtonSprite => null;
-        public override string OverrideText => string.Empty;
+        public override string OverrideText => ChameleonTranslation.Draw.GetString();
         public override Color32 TextOutlineColor => Color.black;
         public override float Cooldown => 1;
         public override void OnClick()
@@ -31,17 +31,26 @@ namespace Crewmeleon.Buttons
 
                 spectatorBehaviour.Spectating = false;
                 spectatorBehaviour.Update();
+
+                CustomButton<SpectateButton>.Instance.Button.graphic.sprite = ChameleonAssets.Spectate1;
             }
             else
             {
                 ChameleonHelper.PaintState = PaintState.None;
+                ZoomButton.Zoom?.gameObject.SetActive(false);
+                CustomButton<ZoomButton>.Instance.Button.graphic.sprite = ChameleonAssets.Zoom1;
             }
             HudHelper.UpdateActiveState();
         }
         public override void Update()
         {
             base.Update();
-            Button.buttonLabelText.text = ChameleonHelper.PaintState == PaintState.None ? "Desenhar" : "Parar";
+            Button.buttonLabelText.text = ChameleonHelper.PaintState == PaintState.None ? ChameleonTranslation.Draw.GetString() : ChameleonTranslation.Stop.GetString();
+
+            if (CanvaPaintBehaviour.Instance != null)
+            {
+                Button.graphic.sprite = CanvaPaintBehaviour.Instance.Canva.Canva.sprite;
+            }
         }
     }
 }

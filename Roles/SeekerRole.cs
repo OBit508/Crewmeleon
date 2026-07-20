@@ -1,5 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Crewmeleon.Components;
+using Crewmeleon.Essential;
 using Crewmeleon.GameMode;
 using Crewmeleon.RPC;
 using FungleAPI.Base.Roles;
@@ -23,10 +24,10 @@ namespace Crewmeleon.Roles
         public static List<NetworkedPlayerInfo> SafeToKill = new List<NetworkedPlayerInfo>();
 
         public ModdedTeam Team { get; } = ModdedTeamManager.Impostors;
-        public StringNames RoleName { get; } = TranslationManager.GetStringName("Procurador");
-        public StringNames RoleBlur { get; } = TranslationManager.GetStringName("Encontre os camaleões");
-        public StringNames RoleBlurMed { get; } = TranslationManager.GetStringName("Encontre os camaleões");
-        public StringNames RoleBlurLong { get; } = TranslationManager.GetStringName("Encontre os camaleões");
+        public StringNames RoleName { get; } = ChameleonTranslation.SeekerName;
+        public StringNames RoleBlur { get; } = ChameleonTranslation.SeekerBlur;
+        public StringNames RoleBlurMed { get; } = ChameleonTranslation.SeekerBlur;
+        public StringNames RoleBlurLong { get; } = ChameleonTranslation.SeekerBlur;
         public Color RoleColor { get; } = Color.red;
         public RoleConfiguration Configuration => new RoleConfiguration(this)
         {

@@ -1,6 +1,5 @@
 ﻿using Crewmeleon.Essential;
 using FungleAPI.Attributes;
-using Il2CppSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,39 +25,22 @@ namespace Crewmeleon.Components
 
         public const int cursorPreviewBaseDiameter = 32;
 
-        public Dictionary<Vector2Int, (Color32, byte)> PaintStrokes = new Dictionary<Vector2Int, (Color32, byte)>();
-
         public CanvaBehaviour Canva;
 
-        private bool canPaint = true;
-        public bool CanPaint
-        {
-            get => canPaint && ChameleonHelper.PaintState == PaintState.Painting && Canva.player.CanMove;
-            set
-            {
-                canPaint = value;
+        public Func<bool> Paint;
+        public bool CanPaint => ChameleonHelper.PaintState == PaintState.Painting && Canva.player.CanMove && Paint();
 
-                if (!canPaint)
-                {
-                    isPainting = false;
-                    lastPaintedPixel = new Vector2Int(-1, -1);
-                }
+        public bool isPainting;
+        public Vector2Int lastPaintedPixel = new Vector2Int(-1, -1);
 
-                SetCursorPreviewActive(canPaint);
-            }
-        }
-
-        private bool isPainting;
-        private Vector2Int lastPaintedPixel = new Vector2Int(-1, -1);
-
-        private GameObject cursorPreviewObject;
-        private SpriteRenderer cursorPreviewRenderer;
+        public GameObject cursorPreviewObject;
+        public SpriteRenderer cursorPreviewRenderer;
 
         public int brushSize = 5;
 
         private float paintTimer;
 
-        public void Awake()
+        public void Start()
         {
             CreateCursorPreview();
             ApplyCursorPreviewScale();
@@ -128,11 +110,8 @@ namespace Crewmeleon.Components
 
                 if (lastPaintedPixel.x < 0)
                 {
-                    painted = Canva.PaintBrush(current, brushColor, brushSize);
-                    if (painted)
-                    {
-                        PaintStrokes[current] = (brushColor, (byte)brushSize);
-                    }
+                    Canva.PaintBrush(current, brushColor, brushSize);
+                    painted = true;
                 }
                 else
                 {
@@ -149,7 +128,6 @@ namespace Crewmeleon.Components
 
                         if (Canva.PaintBrush(stepPixel, brushColor, brushSize))
                         {
-                            PaintStrokes[stepPixel] = (brushColor, (byte)brushSize);
                             painted = true;
                         }
                     }

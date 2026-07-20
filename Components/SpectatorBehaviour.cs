@@ -51,6 +51,8 @@ namespace Crewmeleon.Components
                 Target = player;
             }
 
+            if (player == null || Target == null) return;
+
             if (HudManager.Instance != null)
             {
                 HudManager.Instance.PlayerCam.Target = Target;

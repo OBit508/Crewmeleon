@@ -16,7 +16,7 @@ namespace Crewmeleon.GameMode
         public class GeneralSettings : SettingsGroup
         {
             public override StringNames GroupName => StringNames.SettingsGeneral;
-            public static ModdedNumberOption ChameleonSpeed = new ModdedNumberOption(ChameleonTranslation.ChameleonSpeed, 1.5f, 0.5f, 3, 0.25f, null, false, NumberSuffixes.Multiplier);
+            public static ModdedNumberOption ChameleonSpeed = new ModdedNumberOption(ChameleonTranslation.ChameleonSpeed, 1, 0.5f, 3, 0.25f, null, false, NumberSuffixes.Multiplier);
             public static ModdedNumberOption SeekerSpeed = new ModdedNumberOption(ChameleonTranslation.SeekerSpeed, 1.5f, 0.5f, 3, 0.25f, null, false, NumberSuffixes.Multiplier);
             public static ModdedNumberOption SeekersCount = new ModdedNumberOption(ChameleonTranslation.SeekerCount, 2, 1, 10, 1, null, false, NumberSuffixes.None);
             public static ModdedNumberOption Time = new ModdedNumberOption(ChameleonTranslation.GameDuration, 150, 10, 800, 10);
@@ -33,9 +33,9 @@ namespace Crewmeleon.GameMode
         public class ChameleonSettings : SettingsGroup
         {
             public override StringNames GroupName => ChameleonTranslation.ChameleonsText;
-            public static ModdedNumberOption StopOutline = new ModdedNumberOption("Tempo para camuflar", 2.5f, 1, 10, 0.5f);
-            public static ModdedNumberOption Proximity = new ModdedNumberOption("Proximidade máxima", 1.5f, 0.2f, 3, 0.1f);
-            public static ModdedNumberOption FoundBar = new ModdedNumberOption("Nivel da barra de proximidade", 0.8f, 0.2f, 2, 0.1f);
+            public static ModdedNumberOption StopOutline = new ModdedNumberOption(ChameleonTranslation.CamouflageTime, 2.5f, 1, 10, 0.5f);
+            public static ModdedNumberOption Proximity = new ModdedNumberOption(ChameleonTranslation.MaxProximity, 1.5f, 0.2f, 3, 0.1f, null, false, NumberSuffixes.None);
+            public static ModdedNumberOption FoundBar = new ModdedNumberOption(ChameleonTranslation.DangerBarLevel, 0.8f, 0.2f, 2, 0.1f, null, false, NumberSuffixes.Multiplier);
         }
     }
 }

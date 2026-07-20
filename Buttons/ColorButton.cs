@@ -16,7 +16,7 @@ namespace Crewmeleon.Buttons
         public override bool Active => base.Active && ChameleonHelper.PaintState != PaintState.None;
         public override ButtonLocation Location => ButtonLocation.BottomLeft;
         public override Sprite ButtonSprite => ChameleonAssets.ColorButton;
-        public override string OverrideText => "Conta gotas";
+        public override string OverrideText => ChameleonTranslation.Dropper.GetString();
         public override Color32 TextOutlineColor => Color.black;
         public override float Cooldown => 1;
         public override void OnClick() 

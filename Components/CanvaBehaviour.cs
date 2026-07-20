@@ -5,8 +5,10 @@ using Crewmeleon.Buttons;
 using Crewmeleon.Essential;
 using Crewmeleon.GameMode;
 using Crewmeleon.Roles;
+using Crewmeleon.RPC;
 using FungleAPI.Components;
 using FungleAPI.Hud;
+using FungleAPI.Networking;
 using FungleAPI.Role;
 using Il2CppSystem;
 using System;
@@ -20,14 +22,19 @@ namespace Crewmeleon.Components
 {
     public class CanvaBehaviour : PlayerComponent
     {
+        public Dictionary<Vector2Int, PaintStroke> Strokes = new Dictionary<Vector2Int, PaintStroke>();
+
         public bool[] Paintable;
         public Color32[] TextureBuffer;
         public SpriteRenderer Canva;
 
         public bool OutlineActive;
         public bool ForceShow;
+        public int CurrentColor = -1;
 
         public RoleTypes ChameleonRole = CustomRoleManager.GetRoleType<ChameleonRole>();
+
+        public float SendTimer;
         public void Start()
         {
             StartCoroutine(CoInitialize().WrapToIl2Cpp());
@@ -39,10 +46,31 @@ namespace Crewmeleon.Components
             Canva.gameObject.SetActive(IsCanvaActive());
             Canva.flipX = player.cosmetics.FlipX;
 
+            SendTimer += Time.deltaTime;
+            if (SendTimer >= 0.2f)
+            {
+                if (Strokes.Count > 0)
+                {
+                    Rpc<RpcSyncBody>.Instance.Send(player);
+                }
+                SendTimer = 0;
+            }
+
+            if (Canva.gameObject.activeSelf)
+            {
+                Canva.material.SetFloat("_Outline", OutlineActive ? 1 : 0);
+                if (CurrentColor != player.Data.DefaultOutfit.ColorId)
+                {
+                    CurrentColor = player.Data.DefaultOutfit.ColorId;
+                    Canva.sprite = CreateIdle(CurrentColor);
+                }
+            }
+
             if (CanvaPaintBehaviour.Instance == null && player.AmOwner)
             {
                 CanvaPaintBehaviour.Instance = Canva.gameObject.AddComponent<CanvaPaintBehaviour>();
                 CanvaPaintBehaviour.Instance.Canva = this;
+                CanvaPaintBehaviour.Instance.Paint = () => ZoomButton.Zoom == null || !ZoomButton.Zoom.gameObject.activeSelf;
             }
         }
         public bool IsCanvaActive()
@@ -95,19 +123,7 @@ namespace Crewmeleon.Components
             Canva.material = new Material(Shader.Find("Sprites/Outline"));
             Canva.material.SetColor("_OutlineColor", Color.white);
 
-            Material playerM = new Material(Shader.Find("Unlit/PlayerShader"));
-            PlayerMaterial.SetColors(colorId, playerM);
-
-            Sprite original = ChameleonAssets.DefaultIdle;
-
-            Canva.sprite = Sprite.Create(
-                ChameleonHelper.ApplyMaterial(original.texture, playerM),
-                original.rect,
-                original.pivot / original.rect.size,
-                original.pixelsPerUnit,
-                0,
-                SpriteMeshType.FullRect
-            );
+            Canva.sprite = CreateIdle(colorId);
 
             Texture2D texture = Canva.sprite.texture;
             Color[] pixels = texture.GetPixels();
@@ -121,6 +137,23 @@ namespace Crewmeleon.Components
             TextureBuffer = texture.GetPixels32();
 
             Canva.gameObject.SetActive(false);
+        }
+        public Sprite CreateIdle(int colorId)
+        {
+            Material playerM = new Material(Shader.Find("Unlit/PlayerShader"));
+            PlayerMaterial.SetColors(colorId, playerM);
+
+            Sprite original = ChameleonAssets.DefaultIdle;
+
+            Sprite sp = Sprite.Create(
+                ChameleonHelper.ApplyMaterial(original.texture, playerM),
+                original.rect,
+                original.pivot / original.rect.size,
+                original.pixelsPerUnit,
+                0,
+                SpriteMeshType.FullRect
+            );
+            return sp;
         }
         public bool PaintBrush(Vector2Int center, Color32 color, int brushSize)
         {
@@ -155,6 +188,11 @@ namespace Crewmeleon.Components
                     TextureBuffer[index] = color;
                     paintedAny = true;
                 }
+            }
+
+            if (player.AmOwner)
+            {
+                Strokes[center] = new PaintStroke(color, (byte)brushSize);
             }
 
             return paintedAny;

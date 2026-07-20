@@ -16,26 +16,26 @@ using UnityEngine.UIElements;
 
 namespace Crewmeleon.RPC
 {
-    internal class RpcSyncBody : SimpleRpc<NetworkedPlayerInfo>
+    internal class RpcSyncBody : SimpleRpc<PlayerControl>
     {
         public override void Write(MessageWriter messageWriter)
         {
-            IEnumerable<KeyValuePair<Vector2Int, (Color32, byte)>> batch = CanvaPaintBehaviour.Instance.PaintStrokes.Take(80);
+            IEnumerable<KeyValuePair<Vector2Int, PaintStroke>> batch = CanvaPaintBehaviour.Instance.Canva.Strokes.Take(80);
 
             messageWriter.Write((byte)batch.Count());
-            foreach (KeyValuePair<Vector2Int, (Color32, byte)> pair in batch)
+            foreach (KeyValuePair<Vector2Int, PaintStroke> pair in batch)
             {
-                CanvaPaintBehaviour.Instance.PaintStrokes.Remove(pair.Key);
+                CanvaPaintBehaviour.Instance.Canva.Strokes.Remove(pair.Key);
 
                 ushort index = (ushort)(pair.Key.y * 165 + pair.Key.x);
                 messageWriter.Write(index);
-                messageWriter.Write(pair.Value.Item2);
-                messageWriter.Write(pair.Value.Item1.r);
-                messageWriter.Write(pair.Value.Item1.g);
-                messageWriter.Write(pair.Value.Item1.b);
+                messageWriter.Write(pair.Value.Radius);
+                messageWriter.Write(pair.Value.Color.r);
+                messageWriter.Write(pair.Value.Color.g);
+                messageWriter.Write(pair.Value.Color.b);
             }
         }
-        public override void Handle(NetworkedPlayerInfo innerNetObject, MessageReader messageReader)
+        public override void Handle(PlayerControl innerNetObject, MessageReader messageReader)
         {
             CanvaBehaviour canvaBehaviour = innerNetObject.GetComponent<CanvaBehaviour>();
 

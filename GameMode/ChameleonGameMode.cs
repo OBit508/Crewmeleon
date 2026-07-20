@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using Crewmeleon.Essential;
 using Crewmeleon.Roles;
 using Crewmeleon.RPC;
 using FungleAPI.Api;
@@ -32,7 +33,7 @@ namespace Crewmeleon.GameMode
         public float RevelationTime;
         public bool CanCount;
         public override GameModeOptions ModeOptions { get; } = new ChameleonModeSettings();
-        public override StringNames GameModeName => TranslationManager.GetStringName("Camaleões");
+        public override StringNames GameModeName => ChameleonTranslation.ChameleonsText;
         public override void OnGameStart()
         {
             ProgressTracker = HudManager.Instance.TaskPanel.transform.parent.GetChild(1).GetComponent<ProgressTracker>();

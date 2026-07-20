@@ -17,9 +17,10 @@ namespace Crewmeleon.Buttons
     [FungleAPI.Attributes.RegisterPriority(1)]
     public class GradientButton : RoleButton<ChameleonRole>
     {
+        public override bool Active => base.Active && ChameleonHelper.PaintState != PaintState.None;
         public override ButtonLocation Location => ButtonLocation.BottomLeft;
-        public override Sprite ButtonSprite => null;
-        public override string OverrideText => "Gradiente";
+        public override Sprite ButtonSprite => ChameleonAssets.GradientButton;
+        public override string OverrideText => ChameleonTranslation.Gradient.GetString();
         public override Color32 TextOutlineColor => Color.black;
         public override float Cooldown => 1;
         public override void OnClick()
@@ -28,7 +29,7 @@ namespace Crewmeleon.Buttons
 
             Minigame.Instance = GameObject.Instantiate(ShipPrefabLoader.SkeldPrefab.transform.Find("TaskAddConsole").GetComponent<SystemConsole>().MinigamePrefab, Camera.main.transform);
 
-            new GameObject("Gradient")
+            SpriteRenderer spriteRenderer = new GameObject("Gradient")
             {
                 layer = 5,
                 transform =
@@ -36,7 +37,13 @@ namespace Crewmeleon.Buttons
                     parent = Minigame.Instance.transform,
                     localPosition = new Vector3(0, 0, -1)
                 }
-            }.AddComponent<SpriteRenderer>().sprite = ChameleonAssets.Gradient;
+            }.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = ChameleonAssets.Gradient;
+            spriteRenderer.gameObject.SetActive(false);
+
+            BoxCollider2D boxCollider2D = spriteRenderer.gameObject.AddComponent<BoxCollider2D>();
+            boxCollider2D.isTrigger = true;
+            spriteRenderer.gameObject.SetActive(true);
 
             Minigame.Instance.timeOpened = Time.realtimeSinceStartup;
             if (PlayerControl.LocalPlayer)
@@ -52,7 +59,7 @@ namespace Crewmeleon.Buttons
 
             Minigame.Instance.gameObject.AddComponent<Updater>().update = delegate
             {
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0) && boxCollider2D.OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
                 {
                     ChameleonHelper.BrushColor = ChameleonHelper.GetMousePixelColor();
                 }

@@ -1,0 +1,33 @@
+{
+  "language": "pt-br",
+
+  "Stop": "Parar",
+  "Draw": "Desenhar",
+  "Dropper": "Conta-gotas",
+  "Gradient": "Gradiente",
+  "Zoom": "Zoom",
+  "Spectate": "Espectar",
+
+  "SeekerName": "Caçador",
+  "SeekerBlur": "Encontre todos os camaleões",
+  "ChameleonName": "Camaleão",
+  "ChameleonBlur": "Camufle-se para enganar os caçadores",
+
+  "InfectionText": "Infecção",
+  "ChameleonsText": "Camaleões",
+
+  "ChameleonSpeed": "Velocidade do camaleão",
+  "SeekerSpeed": "Velocidade do caçador",
+  "SeekerCount": "Quantidade de caçadores",
+  "GameDuration": "Duração da partida",
+  "HideTime": "Tempo para se esconder",
+  "ShowNames": "Mostrar nomes",
+  "ChatActive": "Chat durante a partida",
+
+  "InfectionActive": "Infecção ativa",
+  "HidePlayers": "Ocultar jogadores",
+
+  "CamouflageTime": "Tempo de camuflagem",
+  "MaxProximity": "Proximidade máxima",
+  "DangerBarLevel": "Nível da barra de perigo"
+}

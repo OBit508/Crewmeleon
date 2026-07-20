@@ -25,10 +25,10 @@ namespace Crewmeleon.Roles
     {
         public CanvaBehaviour CanvaBehaviour;
         public ModdedTeam Team { get; } = ModdedTeamManager.Crewmates;
-        public StringNames RoleName { get; } = TranslationManager.GetStringName("Camaleão");
-        public StringNames RoleBlur { get; } = TranslationManager.GetStringName("Se camufle");
-        public StringNames RoleBlurMed { get; } = TranslationManager.GetStringName("Se camufle");
-        public StringNames RoleBlurLong { get; } = TranslationManager.GetStringName("Se camufle");
+        public StringNames RoleName { get; } = ChameleonTranslation.ChameleonName;
+        public StringNames RoleBlur { get; } = ChameleonTranslation.ChameleonBlur;
+        public StringNames RoleBlurMed { get; } = ChameleonTranslation.ChameleonBlur;
+        public StringNames RoleBlurLong { get; } = ChameleonTranslation.ChameleonBlur;
         public Color RoleColor { get; } = Color.gray;
         public RoleConfiguration Configuration => new RoleConfiguration(this)
         {
@@ -51,20 +51,9 @@ namespace Crewmeleon.Roles
 
             CanvaBehaviour = Player.GetComponent<CanvaBehaviour>();
 
-            Player.MyPhysics.Speed = 1.5f;
-
             Player.MyPhysics.Animations.group.SpriteAnimator.transform.parent.localScale = Vector3.zero;
 
-            HorizontalGauge gaugePrefab;
-            if (GetTaskPrefab(TaskTypes.UploadData) != null)
-            {
-                gaugePrefab = GetTaskPrefab(TaskTypes.UploadData).MinigamePrefab.TryCast<UploadDataGame>().Gauge;
-            }
-            else
-            {
-                gaugePrefab = GetTaskPrefab(TaskTypes.ProcessData).MinigamePrefab.TryCast<ProcessDataMinigame>().Gauge;
-            }
-            Gauge = GameObject.Instantiate<HorizontalGauge>(gaugePrefab, Player.transform);
+            Gauge = GameObject.Instantiate<HorizontalGauge>(GetTaskPrefab(TaskTypes.UploadData).MinigamePrefab.TryCast<UploadDataGame>().Gauge, Player.transform);
             Gauge.transform.localPosition = new Vector3(0, -0.7f, 0);
             Gauge.transform.localScale = new Vector3(0.65f, 1, 1);
 
@@ -133,8 +122,6 @@ namespace Crewmeleon.Roles
             Gauge?.gameObject.Destroy();
 
             if (Player == null) return;
-
-            Player.MyPhysics.Speed = 2.5f;
 
             if (Player.AmOwner)
             {

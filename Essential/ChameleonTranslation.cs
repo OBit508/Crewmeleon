@@ -7,8 +7,21 @@ using System.Threading.Tasks;
 
 namespace Crewmeleon.Essential
 {
+    [Translation("Crewmeleon.Assets.Languages")]
     public static class ChameleonTranslation
     {
+        public static Translator Stop { get; } = new Translator("Stop");
+        public static Translator Draw { get; } = new Translator("Draw");
+        public static Translator Dropper { get; } = new Translator("Color Dropper");
+        public static Translator Gradient { get; } = new Translator("Gradient");
+        public static Translator Zoom { get; } = new Translator("Zoom");
+        public static Translator Spectate { get; } = new Translator("Spectate");
+
+        public static Translator SeekerName { get; } = new Translator("Seeker");
+        public static Translator SeekerBlur { get; } = new Translator("Find all chameleons");
+        public static Translator ChameleonName { get; } = new Translator("Chameleon");
+        public static Translator ChameleonBlur { get; } = new Translator("Camouflage yourself to fool the seekers");
+
         public static Translator InfectionText { get; } = new Translator("Infection");
         public static Translator ChameleonsText { get; } = new Translator("Chameleons");
 
@@ -22,5 +35,9 @@ namespace Crewmeleon.Essential
 
         public static Translator InfectionActive { get; } = new Translator("Infection active");
         public static Translator HidePlayers { get; } = new Translator("Hide players");
+
+        public static Translator CamouflageTime { get; } = new Translator("Camouflage time");
+        public static Translator MaxProximity { get; } = new Translator("Max proximity");
+        public static Translator DangerBarLevel { get; } = new Translator("Danger bar level");
     }
 }

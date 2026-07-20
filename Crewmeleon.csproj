@@ -20,9 +20,11 @@
     <Compile Include="Buttons\DrawButton.cs" />
     <Compile Include="Buttons\GradientButton.cs" />
     <Compile Include="Buttons\SpectateButton.cs" />
+    <Compile Include="Buttons\ZoomButton.cs" />
     <Compile Include="Components\CanvaBehaviour.cs" />
     <Compile Include="Components\CanvaPaintBehaviour.cs" />
     <Compile Include="Components\MouseIconBehaviour.cs" />
+    <Compile Include="Components\PaintStroke.cs" />
     <Compile Include="Components\SpectatorBehaviour.cs" />
     <Compile Include="CrewmeleonPlugin.cs" />
     <Compile Include="Essential\ChameleonAssets.cs" />
@@ -38,6 +40,17 @@
     <Compile Include="RPC\RpcSetSeeker.cs" />
     <Compile Include="RPC\RpcSyncBody.cs" />
     <Compile Include="System\Runtime\CompilerServices\RefSafetyRulesAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Languages\pt-br.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Zoom1.png" />
+    <EmbeddedResource Include="Assets\Zoom2.png" />
+    <EmbeddedResource Include="Assets\GradientButton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\ZoomBackground.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\Gradient.png" />
@@ -510,5 +523,8 @@
     <Reference Include="__Generated">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Among Us\BepInEx\interop\__Generated.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\Languages\" />
   </ItemGroup>
 </Project>

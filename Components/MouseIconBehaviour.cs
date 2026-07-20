@@ -21,6 +21,10 @@ namespace Crewmeleon.Components
             {
                 CurrentIcon = ChameleonHelper.PaintState;
             }
+            else
+            {
+                ChameleonHelper.PaintState = PaintState.None;
+            }
 
             if (LastIcon != CurrentIcon)
             {
