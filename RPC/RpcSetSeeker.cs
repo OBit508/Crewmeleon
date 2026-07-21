@@ -48,7 +48,7 @@ namespace Crewmeleon.RPC
                 PlayerNameColor.Set(pc);
             }));
 
-            playerControl.Data.Role.SafeCast<SeekerRole>()?.StartStun(false);
+            playerControl.Data.Role.SafeCast<SeekerRole>()?.StartStun();
 
             playerControl.StopAllCoroutines();
         }

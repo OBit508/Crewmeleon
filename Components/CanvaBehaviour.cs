@@ -30,7 +30,6 @@ namespace Crewmeleon.Components
 
         public bool OutlineActive;
         public bool ForceShow;
-        public int CurrentColor = -1;
 
         public RoleTypes ChameleonRole = CustomRoleManager.GetRoleType<ChameleonRole>();
 
@@ -59,11 +58,6 @@ namespace Crewmeleon.Components
             if (Canva.gameObject.activeSelf)
             {
                 Canva.material.SetFloat("_Outline", OutlineActive ? 1 : 0);
-                if (CurrentColor != player.Data.DefaultOutfit.ColorId)
-                {
-                    CurrentColor = player.Data.DefaultOutfit.ColorId;
-                    Canva.sprite = CreateIdle(CurrentColor);
-                }
             }
 
             if (CanvaPaintBehaviour.Instance == null && player.AmOwner)
@@ -123,22 +117,11 @@ namespace Crewmeleon.Components
             Canva.material = new Material(Shader.Find("Sprites/Outline"));
             Canva.material.SetColor("_OutlineColor", Color.white);
 
-            Canva.sprite = CreateIdle(colorId);
-
-            Texture2D texture = Canva.sprite.texture;
-            Color[] pixels = texture.GetPixels();
-            Paintable = new bool[pixels.Length];
-
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                Paintable[i] = pixels[i].a > 0;
-            }
-
-            TextureBuffer = texture.GetPixels32();
+            ResetTexture(colorId);
 
             Canva.gameObject.SetActive(false);
         }
-        public Sprite CreateIdle(int colorId)
+        public void ResetTexture(int colorId)
         {
             Material playerM = new Material(Shader.Find("Unlit/PlayerShader"));
             PlayerMaterial.SetColors(colorId, playerM);
@@ -153,7 +136,19 @@ namespace Crewmeleon.Components
                 0,
                 SpriteMeshType.FullRect
             );
-            return sp;
+
+            Canva.sprite = sp;
+
+            Texture2D texture = sp.texture;
+            Color[] pixels = texture.GetPixels();
+            Paintable = new bool[pixels.Length];
+
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                Paintable[i] = pixels[i].a > 0;
+            }
+
+            TextureBuffer = texture.GetPixels32();
         }
         public bool PaintBrush(Vector2Int center, Color32 color, int brushSize)
         {

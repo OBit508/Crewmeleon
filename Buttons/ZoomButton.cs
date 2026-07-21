@@ -5,6 +5,7 @@ using FungleAPI.Base.Buttons;
 using FungleAPI.Components;
 using FungleAPI.Hud;
 using FungleAPI.Ship;
+using FungleAPI.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace Crewmeleon.Buttons
     public class ZoomButton : RoleButton<ChameleonRole>
     {
         public static SpriteRenderer Zoom;
+        public static float X = 1;
         public override bool Active => base.Active && ChameleonHelper.PaintState != PaintState.None;
         public override ButtonLocation Location => ButtonLocation.BottomLeft;
         public override Sprite ButtonSprite => ChameleonAssets.Zoom1;
@@ -104,22 +106,8 @@ namespace Crewmeleon.Buttons
 
                 meshFilter.sharedMesh = quadMesh;
 
-                GameObject camObj = new GameObject("Render Camera")
-                {
-                    transform =
-                {
-                    parent = Zoom.transform,
-                }
-                };
-                Camera camera = camObj.AddComponent<Camera>();
-
-                camera.orthographic = true;
+                Camera camera = GameObject.Instantiate(ShipPrefabLoader.SkeldPrefab.transform.GetChild(21).GetChild(0).GetChild(1).GetChild(0).GetComponent<SystemConsole>().MinigamePrefab.SafeCast<SurveillanceMinigame>().CameraPrefab, Zoom.transform);
                 camera.orthographicSize = 0.58f;
-                camera.clearFlags = CameraClearFlags.SolidColor;
-                camera.backgroundColor = Color.clear;
-                camera.nearClipPlane = 0.01f;
-                camera.farClipPlane = 1000f;
-                camera.transform.rotation = Quaternion.identity;
 
                 RenderTexture rt = new RenderTexture(512, 512, 32);
                 rt.Create();
@@ -135,9 +123,7 @@ namespace Crewmeleon.Buttons
                 {
                     spriteRenderer.flipX = CanvaPaintBehaviour.Instance.Canva.Canva.flipX;
                     spriteRenderer.sprite = CanvaPaintBehaviour.Instance.Canva.Canva.sprite;
-                    Vector3 vector3 = PlayerControl.LocalPlayer.transform.position;
-                    vector3.z = 1;
-                    camObj.transform.position = vector3;
+                    camera.transform.position = PlayerControl.LocalPlayer.transform.position;
                     if (canvaPaintBehaviour.cursorPreviewObject != null)
                     {
                         canvaPaintBehaviour.cursorPreviewObject.layer = 5;

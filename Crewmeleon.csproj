@@ -35,6 +35,7 @@
     <Compile Include="Essential\ChameleonHelper.cs" />
     <Compile Include="GameMode\HostImpCommand.cs" />
     <Compile Include="Essential\PaintState.cs" />
+    <Compile Include="Patches\PlayerControlPatch.cs" />
     <Compile Include="Roles\ChameleonRole.cs" />
     <Compile Include="Roles\SeekerRole.cs" />
     <Compile Include="RPC\RpcSetSeeker.cs" />

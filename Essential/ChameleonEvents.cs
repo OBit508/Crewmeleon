@@ -24,7 +24,7 @@ namespace Crewmeleon.Essential
                 {
                     if (playerControl.Data.Role.Is(out SeekerRole seekerRole))
                     {
-                        seekerRole.StartStun(true);
+                        seekerRole.StartStun();
                     }
                 }
             }

@@ -59,6 +59,8 @@ namespace Crewmeleon.Roles
             Gauge.transform.localScale = new Vector3(0.65f, 1, 1);
 
             Gauge.gameObject.SetActive(false);
+
+            CanvaBehaviour.ResetTexture(Player.Data.DefaultOutfit.ColorId);
         }
         public void Update()
         {

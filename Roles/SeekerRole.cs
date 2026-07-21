@@ -33,7 +33,8 @@ namespace Crewmeleon.Roles
         {
             CanUseVent = false,
             CanSabotage = false,
-            HideInLobby = true
+            HideInLobby = true,
+            HideInFreeplay = true
         };
         public KillButtonConfig KillConfig { get; } = new KillButtonConfig(out KillButtonConfig self)
         {
@@ -61,46 +62,19 @@ namespace Crewmeleon.Roles
         {
             return base.ValidTarget(target) && SafeToKill.Contains(target);
         }
-        public void StartStun(bool stun)
+        public void StartStun()
         {
-            StartCoroutine(CoStun(stun).WrapToIl2Cpp());
+            StartCoroutine(CoStun().WrapToIl2Cpp());
         }
-        public System.Collections.IEnumerator CoStun(bool stun)
+        public System.Collections.IEnumerator CoStun()
         {
-            if (Player.AmOwner && stun)
-            {
-                HudManager.Instance.FullScreen.gameObject.SetActive(true);
-                HudManager.Instance.FullScreen.color = Color.black;
-            }
-
-            Player.MyPhysics.Speed = 0;
+            Player.moveable = false;
             Player.rigidbody2D.velocity = Vector2.zero;
             Player.cosmetics.SetBodyCosmeticsVisible(false);
             yield return Player.MyPhysics.CoAnimateCustom(HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim);
             Player.cosmetics.ToggleHat(true);
             Player.MyPhysics.SetBodyType(PlayerBodyTypes.Seeker);
-            Player.MyPhysics.Speed = 0;
-            Player.rigidbody2D.velocity = Vector2.zero;
-
-            if (GameMode<ChameleonGameMode>.Instance.HideTime <= 0)
-            {
-                if (Player.AmOwner && stun)
-                {
-                    HudManager.Instance.FullScreen.gameObject.SetActive(false);
-                }
-                Player.MyPhysics.Speed = 2.5f;
-                yield break;
-            }
-            while (GameMode<ChameleonGameMode>.Instance.HideTime > 0)
-            {
-                yield return null;
-            }
-
-            if (Player.AmOwner && stun)
-            {
-                HudManager.Instance.FullScreen.gameObject.SetActive(false);
-            }
-            Player.MyPhysics.Speed = 2.5f;
+            Player.moveable = true;
         }
     }
 }

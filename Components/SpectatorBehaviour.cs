@@ -53,7 +53,7 @@ namespace Crewmeleon.Components
 
             if (player == null || Target == null) return;
 
-            if (HudManager.Instance != null)
+            if (HudManager.InstanceExists)
             {
                 HudManager.Instance.PlayerCam.Target = Target;
                 player.lightSource.transform.position = Target.transform.position;
@@ -129,13 +129,13 @@ namespace Crewmeleon.Components
         {
             if (PlayerText == null) return;
 
-            PlayerText.text = $"{Target.Data.PlayerName}\n<size=40%>({SpectatorIndex + 1}/{GetSpectablePlayers().Count})";
+            PlayerText.text = $"{Target.Data.PlayerName}\n<size=40%>{Target.Data.Role.TeamColor.ToTextColor()}{Target.Data.Role.NiceName}</color>";
         }
 
 
         public List<PlayerControl> GetSpectablePlayers()
         {
-            if (ChameleonModeSettings.InfectionSettings.Infection.BooleanValue)
+            if (ChameleonModeSettings.InfectionSettings.Infection.BooleanValue && AmongUsClient.Instance.NetworkMode != NetworkModes.FreePlay)
             {
                 return PlayerControl.AllPlayerControls.ToSystemList().FindAll(p => p.Data.Role.TeamType == RoleTeamTypes.Impostor);
             }
